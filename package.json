@@ -1,0 +1,42 @@
+{
+  "name": "store-track",
+  "version": "0.1.0",
+  "description": "The simple Redux-like state manager",
+  "author": "Evgeny Petrov",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint . && jest --forceExit --detectOpenHandles --coverage"
+  },
+  "keywords": [
+    "data",
+    "store",
+    "state",
+    "reactive",
+    "functional",
+    "state manager"
+  ],
+  "homepage": "https://lemarck.github.io/store-track",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeMarck/store-track.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LeMarck/store-track/issues"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "index.d.ts",
+    "index.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "devDependencies": {
+    "eslint": "^7.12.1",
+    "jest": "^26.6.2"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  }
+}
