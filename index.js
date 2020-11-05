@@ -1,15 +1,15 @@
-function createStore(initialState, actions) {
+exports.createStore = function createStore(initialState, actions) {
     let state = initialState;
     let subscriptions = [];
 
     return {
-        subscribe(callback) {
-            subscriptions.push(callback);
+        subscribe(handler) {
+            subscriptions.push(handler);
 
-            callback(state);
+            handler(state);
 
             return () => {
-                subscriptions = subscriptions.filter(cb => cb !== callback);
+                subscriptions = subscriptions.filter(cb => cb !== handler);
             };
         },
         dispatch(action, data) {
@@ -22,6 +22,4 @@ function createStore(initialState, actions) {
             return state;
         }
     };
-}
-
-module.exports = { createStore };
+};

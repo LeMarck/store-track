@@ -8,10 +8,12 @@ export type StoreActions<State, Actions> = {
 export type StoreDispatch<Actions> =
     <Action extends keyof Actions>(event: Action, ...data: DataTypes<Actions, Action>) => void;
 
+export type StoreSubscribe<State> = (handler: (state: State) => void) => () => void;
+
 export type Store<State, Actions> = {
-    subscribe(callback: (state: State) => void): () => void;
+    getState: () => State;
     dispatch: StoreDispatch<Actions>;
-    getState(): State;
+    subscribe: StoreSubscribe<State>;
 };
 
 export function createStore<State, Actions>(
