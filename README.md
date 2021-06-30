@@ -1,12 +1,12 @@
 # ![Store Track Logo](logo.svg) Store Track
 
-The simple Redux-like state manager
+The simple state manager
 
 💎 **Type safe**. TypeScript support out of box.
 
 ⚙️ **Framework agnostic**. Can work with any UI or server framework.
 
-💻️ **Developer-friendly**. Simple API surface and helpful community.
+💻️ **Developer-friendly**. Simple API.
 
 ⚡️ **Maximum performance**. Static initialization provides boost in performance for runtime.
 
@@ -60,7 +60,7 @@ const store = createStore(
 
 * `.getState()` – Returns current state of store.
 * `.dispatch(action, data)` – Calls a reducer with the appropriate `action` and the `data` passed to it.
-* `.subscribe(handler)` – Call `handler` function each time when store is updated. 
+* `.subscribe(handler)` – Call `handler` function each time when store is update. 
 
 ## TypeScript
 
@@ -97,18 +97,18 @@ store.dispatch('dec')        // Unknown event
 ### Hook
 
 ```ts
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { Store } from 'store-track';
 
 export function useStoreTrack<State, Actions>(store: Store<State, Actions>): State {
-    const [state, setState] = useState<State>(store.getState());
+    const [, forceRender] = useReducer((s: number) => s + 1, 0);
 
-    useEffect(() => {
-        const unsubscribe = store.subscribe(setState);
-        return () => unsubscribe();
-    }, [store]);
+    useEffect(
+        () => store.subscribe(() => forceRender(1)),
+        [store]
+    );
 
-    return state;
+    return store.getState();
 }
 ```
 

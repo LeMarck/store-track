@@ -1,16 +1,16 @@
-export type DataTypes<Map, Key extends keyof Map> =
-    Map extends never ? [never?] : Map[Key] extends never | undefined ? [never?] : [Map[Key]];
+export type Args<A, B> = B extends (never | void) ? [A] : [A, B];
+
+export type StoreDispatch<Actions> = <Action extends keyof Actions>(...args: Args<Action, Actions[Action]>) => void;
 
 export type StoreActions<State, Actions> = {
-    [Action in keyof Actions]: (state: State, ...data: DataTypes<Actions, Action>) => State;
-};
+    [Action in keyof Actions]: (...args: Args<State, Actions[Action]>) => State
+}
 
-export type StoreDispatch<Actions> =
-    <Action extends keyof Actions>(event: Action, ...data: DataTypes<Actions, Action>) => void;
+export type Unsubscribe = () => void;
 
-export type StoreSubscribe<State> = (handler: (state: State) => void) => () => void;
+export type StoreSubscribe<State> = (handler: (state: State) => void) => Unsubscribe;
 
-export type Store<State, Actions> = {
+type Store<State, Actions> = {
     getState: () => State;
     dispatch: StoreDispatch<Actions>;
     subscribe: StoreSubscribe<State>;
