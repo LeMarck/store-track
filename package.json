@@ -1,13 +1,18 @@
 {
   "name": "store-track",
-  "version": "0.2.0",
-  "description": "The simple Redux-like state manager",
-  "author": "Evgeny Petrov",
+  "version": "0.1.0",
+  "description": "Naive implementation of the state manager library Effector",
+  "author": {
+    "name": "Evgeny Petrov",
+    "email": "jeysonep@gmail.com"
+  },
   "license": "MIT",
   "sideEffects": false,
-  "main": "index.js",
+  "private": true,
+  "main": "dist/index.js",
   "scripts": {
-    "test": "eslint . && jest --forceExit --detectOpenHandles --coverage"
+    "test": "eslint . && jest",
+    "build": "tsc"
   },
   "keywords": [
     "data",
@@ -26,17 +31,34 @@
     "url": "https://github.com/LeMarck/store-track/issues"
   },
   "files": [
+    "dist",
     "CHANGELOG.md",
-    "index.d.ts",
-    "index.js",
     "LICENSE",
     "README.md"
   ],
   "devDependencies": {
-    "eslint": "7.29.0",
-    "jest": "27.0.6"
+    "@tinkoff/eslint-config": "1.22.0",
+    "@types/jest": "27.0.3",
+    "eslint": "7.32.0",
+    "jest": "27.4.5",
+    "ts-jest": "27.1.1",
+    "typescript": "4.5.4"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=12"
+  },
+  "jest": {
+    "verbose": true,
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "ts"
+    ]
   }
 }

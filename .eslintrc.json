@@ -1,31 +1,24 @@
 {
-  "env": {
-    "browser": true,
-    "commonjs": true,
-    "es2020": true,
-    "node": true,
-    "jest": true
-  },
-  "extends": "eslint:recommended",
-  "parserOptions": {
-    "ecmaVersion": 2020
-  },
+  "extends": [
+    "eslint:recommended",
+    "@tinkoff/eslint-config/app",
+    "@tinkoff/eslint-config/jest",
+    "plugin:import/typescript"
+  ],
+  "plugins": [
+    "import"
+  ],
   "rules": {
-    "indent": [
+    "newline-before-return": "error",
+    "prettier/prettier": [
       "error",
-      4
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "semi": [
-      "error",
-      "always"
+      {
+        "singleQuote": true
+      }
     ]
-  }
+  },
+  "ignorePatterns": [
+    "dist",
+    "coverage"
+  ]
 }
