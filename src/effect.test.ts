@@ -10,7 +10,7 @@ describe('createEffect', () => {
     await expect(emptyEffect(1)).rejects.toThrow('No handler used in effect');
   });
 
-  it('`.use`: определяет имплементацию эффекта: функцию, которая будет вызвана при срабатывании\n', () => {
+  it('`.use`: определяет имплементацию эффекта: функцию, которая будет вызвана при срабатывании', () => {
     const effectFn = jest.fn();
     const effect = createEffect(jest.fn);
 
@@ -33,8 +33,8 @@ describe('createEffect', () => {
     const result = await updateUserFx({ name: 'John', role: 'admin' });
 
     expect(result).toBe(true);
-    expect(mockUserNameUpdatedWatch).toBeCalledWith('John');
-    expect(mockUserRoleUpdatedWatch).toBeCalledWith('ADMIN');
+    expect(mockUserNameUpdatedWatch).toHaveBeenCalledWith('John');
+    expect(mockUserRoleUpdatedWatch).toHaveBeenCalledWith('ADMIN');
   });
 
   it('`.prepend`: создаёт событие-триггер для преобразования данных перед запуском эффекта', () => {
@@ -45,7 +45,7 @@ describe('createEffect', () => {
     updateUserFx.watch(mockWatcher);
 
     changeName('John');
-    expect(mockWatcher).toBeCalledWith({ role: 'user', name: 'John' });
+    expect(mockWatcher).toHaveBeenCalledWith({ role: 'user', name: 'John' });
   });
 
   it('`.watch`: вызывает дополнительную функцию с сайд-эффектами при каждом срабатывании эффекта', async () => {
@@ -54,19 +54,21 @@ describe('createEffect', () => {
     const unwatch = fx.watch(watcherMock);
 
     await expect(fx({ title: 'Title1' })).resolves.toBe('Title1');
-    expect(watcherMock).toBeCalledWith({ title: 'Title1' });
-    expect(watcherMock).toBeCalledTimes(1);
+    expect(watcherMock).toHaveBeenCalledWith({ title: 'Title1' });
+    expect(watcherMock).toHaveBeenCalledTimes(1);
 
     unwatch();
 
     await expect(fx({ title: 'Title2' })).resolves.toBe('Title2');
-    expect(watcherMock).toBeCalledTimes(1);
+    expect(watcherMock).toHaveBeenCalledTimes(1);
   });
 
   it('`.finally`: событие, которое срабатывает при завершении эффекта с подробной информацией об аргументах, результатах и статусе выполнения', async () => {
     const watcherMock = jest.fn();
     const fetchApiFx = createEffect(async ({ ok }: { ok: boolean }) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
       if (ok) return 'SUCCESS';
       throw Error('ERROR');
     });
@@ -75,7 +77,7 @@ describe('createEffect', () => {
 
     const result = await fetchApiFx({ ok: true });
     expect(result).toEqual('SUCCESS');
-    expect(watcherMock).toBeCalledWith({
+    expect(watcherMock).toHaveBeenCalledWith({
       status: 'done',
       params: {
         ok: true,
@@ -84,7 +86,7 @@ describe('createEffect', () => {
     });
 
     await expect(fetchApiFx({ ok: false })).rejects.toThrow('ERROR');
-    expect(watcherMock).toBeCalledWith({
+    expect(watcherMock).toHaveBeenCalledWith({
       status: 'fail',
       params: {
         ok: false,
@@ -94,14 +96,22 @@ describe('createEffect', () => {
   });
 
   it('`.pending`: стор, который показывает, что эффект находится в процессе выполнения', async () => {
-    const fetchApiFx = createEffect(async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
     const watcherMock = jest.fn();
+    const fetchApiFx = createEffect(
+      async (ms: number) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        })
+    );
 
     fetchApiFx.pending.watch(watcherMock);
 
     await fetchApiFx(100);
 
-    expect(watcherMock.mock.calls).toEqual([[true], [false]]);
+    expect(watcherMock.mock.calls).toEqual([
+      [true, true],
+      [false, false],
+    ]);
   });
 
   it('`.done/doneData`: события, которое срабатывают с результатом выполнения эффекта', async () => {
@@ -114,8 +124,8 @@ describe('createEffect', () => {
 
     await fetchApiFx(42);
 
-    expect(doneDataWatcherMock).toBeCalledWith(42);
-    expect(doneWatcherMock).toBeCalledWith({ params: 42, result: 42 });
+    expect(doneDataWatcherMock).toHaveBeenCalledWith(42);
+    expect(doneWatcherMock).toHaveBeenCalledWith({ params: 42, result: 42 });
   });
 
   it('`.fail/failData`: события, которое срабатывают с ошибкой, возникшей при выполнении эффекта', async () => {
@@ -130,7 +140,7 @@ describe('createEffect', () => {
 
     await fetchApiFx('42').catch(() => 1);
 
-    expect(failDataWatcherMock).toBeCalledWith(Error('42'));
-    expect(failWatcherMock).toBeCalledWith({ params: '42', error: Error('42') });
+    expect(failDataWatcherMock).toHaveBeenCalledWith(Error('42'));
+    expect(failWatcherMock).toHaveBeenCalledWith({ params: '42', error: Error('42') });
   });
 });

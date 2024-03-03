@@ -1,7 +1,7 @@
 {
   "extends": [
     "eslint:recommended",
-    "@tinkoff/eslint-config/app",
+    "@tinkoff/eslint-config/lib",
     "@tinkoff/eslint-config/jest",
     "plugin:import/typescript"
   ],

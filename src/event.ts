@@ -7,10 +7,11 @@ export interface Event<Payload = void> {
   map<NewPayload>(fn: (payload: Payload) => NewPayload): Event<NewPayload>;
   prepend<NewPayload>(fn: (payload: NewPayload) => Payload): Event<NewPayload>;
   filterMap<NewPayload>(fn: (payload: Payload) => NewPayload | void): Event<NewPayload>;
+  filter(config: { fn: (payload: Payload) => boolean }): Event<Payload>;
 }
 
 export function createEvent<Payload = void>(): Event<Payload> {
-  const watchers: Set<(payload: Payload) => void> = new Set<(payload: Payload) => void>();
+  const watchers: Set<(payload: Payload) => void> = new Set();
 
   function action(payload: Payload): void {
     watchers.forEach((subscriber) => subscriber(payload));
@@ -46,6 +47,18 @@ export function createEvent<Payload = void>(): Event<Payload> {
 
       if (nextPayload !== undefined) {
         event(nextPayload as NewPayload);
+      }
+    });
+
+    return event;
+  };
+
+  action.filter = (config: { fn: (payload: Payload) => boolean }): Event<Payload> => {
+    const event = createEvent<Payload>();
+
+    action.watch((payload) => {
+      if (config.fn(payload)) {
+        event(payload);
       }
     });
 

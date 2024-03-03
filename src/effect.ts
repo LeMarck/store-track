@@ -1,7 +1,7 @@
-import type { Event } from './event';
-import type { Store } from './store';
 import { createEvent } from './event';
+import type { Event } from './event';
 import { createStore } from './store';
+import type { Store } from './store';
 import type { Unsubscribe } from './types.h';
 
 type EffectFinally<Params, Done, Fail = Error> =
