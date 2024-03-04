@@ -6,12 +6,12 @@ import type { Unsubscribe } from './types.h';
 type Unit<T = any> = Event<T> | Store<T> | Effect<T, unknown>;
 
 export interface Store<State> {
-  map<LastState>(fn: (state: State, lastState?: LastState) => LastState): Store<LastState>;
+  map<NewState>(fn: (state: State, lastState?: NewState) => NewState): Store<NewState>;
   on<Payload>(
     trigger: Unit<Payload> | Array<Unit<Payload>>,
     reducer: (state: State, payload: Payload) => State
   ): Store<State>;
-  watch<Payload>(watcher: (state: State, payload: Payload) => void): Unsubscribe;
+  watch(watcher: (state: State) => void): Unsubscribe;
   watch<Payload>(trigger: Unit<Payload>, fn: (state: State, payload: Payload) => void): Unsubscribe;
   off<Payload>(trigger: Unit<Payload>): void;
   reset(...triggers: Array<Unit> | [Array<Unit>]): Store<State>;
@@ -20,15 +20,17 @@ export interface Store<State> {
 }
 
 export function createStore<State>(defaultState: State): Store<State> {
-  const watchers: Set<(state: State, payload: any) => void> = new Set();
+  const watchers: Set<(state: State) => void> = new Set();
   const subscribers: Map<Unit<unknown>, () => void> = new Map();
   const initialState = { ...{ defaultState } };
 
   let state = defaultState;
 
-  function update<Payload>(newState: State, payload: Payload): void {
+  function update(newState: State): void {
+    if (newState === undefined || newState === state) return;
+
     state = newState;
-    watchers.forEach((watcher) => watcher(state, payload));
+    watchers.forEach((watcher) => watcher(state));
   }
 
   const store = {
@@ -41,7 +43,7 @@ export function createStore<State>(defaultState: State): Store<State> {
         store.off(clock);
         subscribers.set(
           clock as Unit<unknown>,
-          clock.watch((payload: Payload) => update(reducer(state, payload), payload))
+          clock.watch((payload: Payload) => update(reducer(state, payload)))
         );
       });
 
@@ -56,7 +58,7 @@ export function createStore<State>(defaultState: State): Store<State> {
       }
     },
     watch<Payload>(
-      triggerOrWatcher: Unit<Payload> | ((state: State, payload: Payload) => void),
+      triggerOrWatcher: Unit<Payload> | ((state: State) => void),
       fn?: (state: State, payload: Payload) => void
     ): Unsubscribe {
       const argumentsSize = arguments.length;
@@ -68,11 +70,14 @@ export function createStore<State>(defaultState: State): Store<State> {
 
       watchers.add(triggerOrWatcher);
 
+      triggerOrWatcher(store.getState());
+
       return () => watchers.delete(triggerOrWatcher);
     },
-    map<LastState>(fn: (state: State, lastState?: LastState) => LastState): Store<LastState> {
-      const updateStore = createEvent<LastState>();
-      const newStore = createStore<LastState | undefined>(undefined).on(updateStore, (_, newState) => newState);
+    map<NewState>(fn: (state: State, lastState?: NewState) => NewState): Store<NewState> {
+      const lastResult = fn(store.getState());
+      const updateStore = createEvent<NewState>();
+      const newStore = createStore<NewState>(lastResult).on(updateStore, (_, newState) => newState);
 
       store.watch((s: State) => {
         const lastState = newStore.getState();
@@ -83,7 +88,7 @@ export function createStore<State>(defaultState: State): Store<State> {
         }
       });
 
-      return newStore as Store<LastState>;
+      return newStore as Store<NewState>;
     },
     reset(...triggers: Array<Unit> | [Array<Unit>]): Store<State> {
       triggers.forEach((trigger) => {

@@ -104,14 +104,11 @@ describe('createEffect', () => {
         })
     );
 
-    fetchApiFx.pending.watch(watcherMock);
+    fetchApiFx.pending.watch((value) => watcherMock(value));
 
     await fetchApiFx(100);
 
-    expect(watcherMock.mock.calls).toEqual([
-      [true, true],
-      [false, false],
-    ]);
+    expect(watcherMock.mock.calls).toEqual([[false], [true], [false]]);
   });
 
   it('`.done/doneData`: события, которое срабатывают с результатом выполнения эффекта', async () => {
