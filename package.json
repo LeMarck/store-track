@@ -1,6 +1,6 @@
 {
   "name": "store-track",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Naive implementation of the state manager library Effector",
   "author": {
     "name": "Evgeny Petrov",
@@ -37,28 +37,16 @@
     "README.md"
   ],
   "devDependencies": {
-    "@tinkoff/eslint-config": "2.0.0",
+    "@eslint/js": "^9.10.0",
     "@types/jest": "29.5.12",
-    "eslint": "8.57.0",
+    "eslint": "^9.10.0",
+    "globals": "^15.9.0",
     "jest": "29.7.0",
-    "ts-jest": "29.1.2",
-    "typescript": "5.3.3"
+    "ts-jest": "29.2.5",
+    "typescript": "5.5.4",
+    "typescript-eslint": "^8.4.0"
   },
   "engines": {
-    "node": ">=12"
-  },
-  "jest": {
-    "verbose": true,
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "ts"
-    ]
+    "node": ">=18"
   }
 }

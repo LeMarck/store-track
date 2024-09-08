@@ -1,9 +1,10 @@
-import type { Event } from './event';
 import { createEvent } from './event';
+
+import type { Event } from './event';
 import type { Effect } from './effect';
 import type { Unsubscribe } from './types.h';
 
-type Unit<T = any> = Event<T> | Store<T> | Effect<T, unknown>;
+type Unit<T> = Event<T> | Store<T> | Effect<T, unknown>;
 
 export interface Store<State> {
   map<NewState>(fn: (state: State, lastState?: NewState) => NewState): Store<NewState>;
@@ -14,7 +15,7 @@ export interface Store<State> {
   watch(watcher: (state: State) => void): Unsubscribe;
   watch<Payload>(trigger: Unit<Payload>, fn: (state: State, payload: Payload) => void): Unsubscribe;
   off<Payload>(trigger: Unit<Payload>): void;
-  reset(...triggers: Array<Unit> | [Array<Unit>]): Store<State>;
+  reset<Payload>(...triggers: Array<Unit<Payload>> | [Array<Unit<Payload>>]): Store<State>;
 
   getState(): State;
 }
@@ -90,7 +91,7 @@ export function createStore<State>(defaultState: State): Store<State> {
 
       return newStore as Store<NewState>;
     },
-    reset(...triggers: Array<Unit> | [Array<Unit>]): Store<State> {
+    reset<Payload>(...triggers: Array<Unit<Payload>> | [Array<Unit<Payload>>]): Store<State> {
       triggers.forEach((trigger) => {
         store.on(trigger, () => initialState.defaultState);
       });

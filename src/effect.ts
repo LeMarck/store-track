@@ -1,6 +1,7 @@
 import { createEvent } from './event';
-import type { Event } from './event';
 import { createStore } from './store';
+
+import type { Event } from './event';
 import type { Store } from './store';
 import type { Unsubscribe } from './types.h';
 

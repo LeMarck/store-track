@@ -21,7 +21,7 @@ describe('createEffect', () => {
   });
 
   it('`.map`: создает производное событие на основе данных эффекта', async () => {
-    const updateUserFx = createEffect<{ name: string; role: string }, boolean>((_) => true);
+    const updateUserFx = createEffect<{ name: string; role: string }, boolean>(() => true);
     const userNameUpdate = updateUserFx.map(({ name }) => name);
     const userRoleUpdate = updateUserFx.map(({ role }) => role.toUpperCase());
     const mockUserNameUpdatedWatch = jest.fn();
@@ -39,7 +39,7 @@ describe('createEffect', () => {
 
   it('`.prepend`: создаёт событие-триггер для преобразования данных перед запуском эффекта', () => {
     const mockWatcher = jest.fn();
-    const updateUserFx = createEffect<{ name: string; role: string }, boolean>((_) => true);
+    const updateUserFx = createEffect<{ name: string; role: string }, boolean>(() => true);
     const changeName = updateUserFx.prepend((name: string) => ({ role: 'user', name }));
 
     updateUserFx.watch(mockWatcher);
