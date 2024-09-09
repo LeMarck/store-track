@@ -1,15 +1,15 @@
-import { createStore } from './store';
-import { createEvent } from './event';
+import { createStore } from "./store";
+import { createEvent } from "./event";
 
-describe('createStore', () => {
-  it('should be defined Store', () => {
+describe("createStore", () => {
+  it("should be defined Store", () => {
     const $store = createStore(42);
 
     expect($store).toBeDefined();
     expect($store.getState()).toBe(42);
   });
 
-  it('`.on`: обновляет состояние стора с помощью функции-обработчика при срабатывании триггера', () => {
+  it("`.on`: обновляет состояние стора с помощью функции-обработчика при срабатывании триггера", () => {
     const eventMock = jest.fn(<T>() => createEvent<T>())();
     const reducerMock = jest.fn(() => 1);
     const $store = createStore(0).on([eventMock], reducerMock);
@@ -22,7 +22,7 @@ describe('createStore', () => {
     expect($store.getState()).toBe(1);
   });
 
-  it('Не обновлять стор если редьюсер возвращает `undefined`', () => {
+  it("Не обновлять стор если редьюсер возвращает `undefined`", () => {
     const eventMock = jest.fn(<T>() => createEvent<T>())();
     const $store = createStore(0).on(eventMock, (state) => state);
 
@@ -33,7 +33,7 @@ describe('createStore', () => {
     expect($store.getState()).toBe(0);
   });
 
-  it('`.watch`: вызывает функцию с сайд-эффектами при каждом обновлении стора', () => {
+  it("`.watch`: вызывает функцию с сайд-эффектами при каждом обновлении стора", () => {
     const watcherMock = jest.fn();
     const triggerWatcherMock = jest.fn();
     const add = createEvent<number>();
@@ -57,7 +57,7 @@ describe('createStore', () => {
     expect(triggerWatcherMock).toHaveBeenCalledWith(7, 42);
   });
 
-  it('`unwatch` прекращает отслеживание', () => {
+  it("`unwatch` прекращает отслеживание", () => {
     const watcherMock = jest.fn();
     const add = createEvent<number>();
     const $store = createStore(0).on(add, (state, payload) => state + payload);
@@ -74,26 +74,26 @@ describe('createStore', () => {
     expect(watcherMock).toHaveBeenCalledTimes(2);
   });
 
-  it('`.map`: создает производный стор на основе данных из исходного', () => {
+  it("`.map`: создает производный стор на основе данных из исходного", () => {
     const watcherMock = jest.fn();
     const changed = createEvent<string>();
-    const $title = createStore('').on(changed, (_, newTitle) => newTitle);
+    const $title = createStore("").on(changed, (_, newTitle) => newTitle);
 
     $title.map((title) => title.length).watch((length) => watcherMock(length));
 
-    changed('hello');
+    changed("hello");
     expect(watcherMock).toHaveBeenCalledWith(5);
     expect(watcherMock).toHaveBeenCalledTimes(2);
 
-    changed('world');
+    changed("world");
     expect(watcherMock).toHaveBeenCalledTimes(2);
 
-    changed('hello world');
+    changed("hello world");
     expect(watcherMock).toHaveBeenCalledWith(11);
     expect(watcherMock).toHaveBeenCalledTimes(3);
   });
 
-  it('`.off`: удаляет обработчик для данного триггера', () => {
+  it("`.off`: удаляет обработчик для данного триггера", () => {
     const changed = createEvent<number>();
     const $store = createStore(0).on(changed, (_, newState) => newState);
 
@@ -106,7 +106,7 @@ describe('createStore', () => {
     expect($store.getState()).toBe(42);
   });
 
-  it('`.reset`: cбрасывает состояние стора к исходному значению при срабатывании триггера', () => {
+  it("`.reset`: cбрасывает состояние стора к исходному значению при срабатывании триггера", () => {
     const watcherMock = jest.fn();
     const increment = createEvent();
     const reset = createEvent();

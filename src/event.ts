@@ -1,4 +1,4 @@
-import type { Unsubscribe } from './types.h';
+import type { Unsubscribe } from "./types.h";
 
 export interface Event<Payload = void> {
   (payload: Payload): void;

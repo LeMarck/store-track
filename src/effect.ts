@@ -1,13 +1,13 @@
-import { createEvent } from './event';
-import { createStore } from './store';
+import { createEvent } from "./event";
+import { createStore } from "./store";
 
-import type { Event } from './event';
-import type { Store } from './store';
-import type { Unsubscribe } from './types.h';
+import type { Event } from "./event";
+import type { Store } from "./store";
+import type { Unsubscribe } from "./types.h";
 
 type EffectFinally<Params, Done, Fail = Error> =
-  | { status: 'done'; params: Params; result: Done }
-  | { status: 'fail'; params: Params; error: Fail };
+  | { status: "done"; params: Params; result: Done }
+  | { status: "fail"; params: Params; error: Fail };
 
 export interface Effect<Params, Done, Fail = Error> {
   (params: Params): Promise<Done>;
@@ -29,15 +29,15 @@ export interface Effect<Params, Done, Fail = Error> {
 }
 
 export function createEffect<Params, Done, Fail = Error>(
-  defaultHandler?: (params: Params) => Promise<Done> | Done
+  defaultHandler?: (params: Params) => Promise<Done> | Done,
 ): Effect<Params, Done, Fail> {
   const watchers: Set<(params: Params) => void> = new Set();
   const finallyEvent = createEvent<EffectFinally<Params, Done, Fail>>();
   const doneEvent = finallyEvent.filterMap<{ params: Params; result: Done }>((data) =>
-    data.status === 'done' ? { params: data.params, result: data.result } : undefined
+    data.status === "done" ? { params: data.params, result: data.result } : undefined,
   );
   const failEvent = finallyEvent.filterMap<{ params: Params; error: Fail }>((data) =>
-    data.status === 'fail' ? { params: data.params, error: data.error } : undefined
+    data.status === "fail" ? { params: data.params, error: data.error } : undefined,
   );
   const updatePendingState = createEvent<boolean>();
   const pendingStore = createStore(false).on(updatePendingState, (_, isPending) => isPending);
@@ -52,7 +52,7 @@ export function createEffect<Params, Done, Fail = Error>(
 
   async function effect(params: Params): Promise<Done> {
     if (!currentHandler) {
-      throw new Error('No handler used in effect');
+      throw new Error("No handler used in effect");
     }
 
     watchers.forEach((subscriber) => subscriber(params));
@@ -62,12 +62,12 @@ export function createEffect<Params, Done, Fail = Error>(
     try {
       const result = await currentHandler(params);
 
-      finallyEvent({ status: 'done', params, result });
+      finallyEvent({ status: "done", params, result });
       updatePendingState(false);
 
       return result;
     } catch (error: unknown) {
-      finallyEvent({ status: 'fail', params, error: error as Fail });
+      finallyEvent({ status: "fail", params, error: error as Fail });
       updatePendingState(false);
 
       throw error;

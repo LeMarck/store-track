@@ -1,21 +1,21 @@
-import { createEvent } from './event';
+import { createEvent } from "./event";
 
-import type { Event } from './event';
-import type { Effect } from './effect';
-import type { Unsubscribe } from './types.h';
+import type { Effect } from "./effect";
+import type { Event } from "./event";
+import type { Unsubscribe } from "./types.h";
 
-type Unit<T> = Event<T> | Store<T> | Effect<T, unknown>;
+type Unit<T> = Effect<T, unknown> | Event<T> | Store<T>;
 
 export interface Store<State> {
   map<NewState>(fn: (state: State, lastState?: NewState) => NewState): Store<NewState>;
   on<Payload>(
-    trigger: Unit<Payload> | Array<Unit<Payload>>,
-    reducer: (state: State, payload: Payload) => State
+    trigger: Unit<Payload> | Unit<Payload>[],
+    reducer: (state: State, payload: Payload) => State,
   ): Store<State>;
   watch(watcher: (state: State) => void): Unsubscribe;
   watch<Payload>(trigger: Unit<Payload>, fn: (state: State, payload: Payload) => void): Unsubscribe;
   off<Payload>(trigger: Unit<Payload>): void;
-  reset<Payload>(...triggers: Array<Unit<Payload>> | [Array<Unit<Payload>>]): Store<State>;
+  reset<Payload>(...triggers: Unit<Payload>[]): Store<State>;
 
   getState(): State;
 }
@@ -37,14 +37,14 @@ export function createStore<State>(defaultState: State): Store<State> {
   const store = {
     getState: (): State => state,
     on<Payload>(
-      trigger: Unit<Payload> | Array<Unit<Payload>>,
-      reducer: (state: State, payload: Payload) => State
+      trigger: Unit<Payload> | Unit<Payload>[],
+      reducer: (state: State, payload: Payload) => State,
     ): Store<State> {
       (Array.isArray(trigger) ? trigger : [trigger]).forEach((clock) => {
         store.off(clock);
         subscribers.set(
           clock as Unit<unknown>,
-          clock.watch((payload: Payload) => update(reducer(state, payload)))
+          clock.watch((payload: Payload) => update(reducer(state, payload))),
         );
       });
 
@@ -60,7 +60,7 @@ export function createStore<State>(defaultState: State): Store<State> {
     },
     watch<Payload>(
       triggerOrWatcher: Unit<Payload> | ((state: State) => void),
-      fn?: (state: State, payload: Payload) => void
+      fn?: (state: State, payload: Payload) => void,
     ): Unsubscribe {
       const argumentsSize = arguments.length;
       const isUnit = (_: unknown): _ is Unit<Payload> => argumentsSize === 2;
@@ -91,7 +91,7 @@ export function createStore<State>(defaultState: State): Store<State> {
 
       return newStore as Store<NewState>;
     },
-    reset<Payload>(...triggers: Array<Unit<Payload>> | [Array<Unit<Payload>>]): Store<State> {
+    reset<Payload>(...triggers: Unit<Payload>[]): Store<State> {
       triggers.forEach((trigger) => {
         store.on(trigger, () => initialState.defaultState);
       });
