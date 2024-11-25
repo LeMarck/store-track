@@ -1,8 +1,5 @@
-import { createEvent } from "./event";
-import { createStore } from "./store";
-
-import type { Event } from "./event";
-import type { Store } from "./store";
+import { createEvent, type Event } from "./event";
+import { createStore, type Store } from "./store";
 import type { Unsubscribe } from "./types.h";
 
 type EffectFinally<Params, Done, Fail = Error> =
@@ -23,8 +20,11 @@ export interface Effect<Params, Done, Fail = Error> {
     (handler: (params: Params) => Promise<Done> | Done): void;
     getCurrent(): (params: Params) => Promise<Done> | Done;
   };
+
   watch(watcher: (params: Params) => void): Unsubscribe;
+
   map<Payload>(fn: (params: Params) => Payload): Event<Payload>;
+
   prepend<Payload>(fn: (payload: Payload) => Params): Event<Payload>;
 }
 
@@ -40,7 +40,7 @@ export function createEffect<Params, Done, Fail = Error>(
     data.status === "fail" ? { params: data.params, error: data.error } : undefined,
   );
   const updatePendingState = createEvent<boolean>();
-  const pendingStore = createStore(false).on(updatePendingState, (_, isPending) => isPending);
+  const $pendingStore = createStore(false).on(updatePendingState, (_, isPending) => isPending);
 
   let currentHandler = defaultHandler;
 
@@ -79,7 +79,7 @@ export function createEffect<Params, Done, Fail = Error>(
   effect.fail = failEvent;
   effect.failData = failEvent.map(({ error }) => error);
   effect.finally = finallyEvent;
-  effect.pending = pendingStore;
+  effect.pending = $pendingStore;
   effect.use = use;
 
   effect.watch = (watcher: (params: Params) => void): Unsubscribe => {

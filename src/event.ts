@@ -4,9 +4,13 @@ export interface Event<Payload = void> {
   (payload: Payload): void;
 
   watch(watcher: (payload: Payload) => void): Unsubscribe;
+
   map<NewPayload>(fn: (payload: Payload) => NewPayload): Event<NewPayload>;
+
   prepend<NewPayload>(fn: (payload: NewPayload) => Payload): Event<NewPayload>;
+
   filterMap<NewPayload>(fn: (payload: Payload) => NewPayload | void): Event<NewPayload>;
+
   filter(config: { fn: (payload: Payload) => boolean }): Event<Payload>;
 }
 
