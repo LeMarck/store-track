@@ -1,8 +1,5 @@
-import type { Effect } from "./effect";
-import { createEvent, type Event } from "./event";
-import type { Unsubscribe } from "./types.h";
-
-type Unit<T> = Effect<T, unknown> | Event<T> | Store<T>;
+import { createEvent } from "./event";
+import type { Unit, Unsubscribe } from "./types.h";
 
 export interface Store<State> {
   map<NewState>(fn: (state: State, lastState?: NewState) => NewState): Store<NewState>;
@@ -25,7 +22,7 @@ export interface Store<State> {
 
 export function createStore<State>(defaultState: State): Store<State> {
   const watchers: Set<(state: State) => void> = new Set();
-  const subscribers: Map<Unit<unknown>, () => void> = new Map();
+  const subscribers: Map<Unit<unknown>, Unsubscribe> = new Map();
   const initialState = { ...{ defaultState } };
 
   let state = defaultState;
@@ -54,10 +51,10 @@ export function createStore<State>(defaultState: State): Store<State> {
       return $store;
     },
     off<Payload>(trigger: Unit<Payload>): void {
-      const subscriber = subscribers.get(trigger as Unit<unknown>);
+      const unsubscribe = subscribers.get(trigger as Unit<unknown>);
 
-      if (subscriber) {
-        subscriber();
+      if (unsubscribe) {
+        unsubscribe();
         subscribers.delete(trigger as Unit<unknown>);
       }
     },
