@@ -15,7 +15,6 @@ export interface Effect<Params, Done, Fail = Error> {
   failData: Event<Fail>;
   finally: Event<EffectFinally<Params, Done, Fail>>;
   pending: Store<boolean>;
-
   use: {
     (handler: (params: Params) => Promise<Done> | Done): void;
     getCurrent(): (params: Params) => Promise<Done> | Done;

@@ -1,5 +1,5 @@
 import { createStore } from "./store";
-import { combine, merge } from "./methods";
+import { combine, createApi, merge } from "./methods";
 import { createEvent } from "./event";
 
 describe("methods", () => {
@@ -31,5 +31,22 @@ describe("methods", () => {
 
     baz(42);
     expect(watcherMock).toHaveBeenCalledWith(42);
+  });
+
+  it("should be generating events connected to a store by supplying an object with reducers for these events", () => {
+    const incrementMock = jest.fn();
+    const addMock = jest.fn().mockImplementation((store: number, payload: number): number => store + payload);
+    const $store = createStore(0);
+
+    const { increment, add } = createApi($store, {
+      increment: incrementMock,
+      add: addMock as jest.Mock<number, [number, number]>,
+    });
+
+    increment();
+    expect(incrementMock).toHaveBeenCalled();
+
+    add(10);
+    expect(addMock).toHaveBeenCalledWith(0, 10);
   });
 });

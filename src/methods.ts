@@ -24,10 +24,33 @@ export function combine<S extends Store<unknown>[], NewStore>(
   return newStore;
 }
 
-export function merge<T>(...units: Unit<T>[]): Event<T> {
-  const event = createEvent<T>();
+export function merge<State>(...units: Unit<State>[]): Event<State> {
+  const event = createEvent<State>();
 
   units.forEach((unit) => unit.watch(event));
 
   return event;
+}
+
+export function createApi<State, Api extends { [name: string]: (store: State, payload: never) => State }>(
+  store: Store<State>,
+  api: Api,
+) {
+  const reducers = Object.entries(api) as [keyof Api, (store: State, payload: never) => State][];
+  const result = {} as {
+    [K in keyof Api]: ((store: State, payload: void) => State) extends Api[K]
+      ? Event
+      : Api[K] extends (store: State) => State
+        ? Event
+        : Api[K] extends (store: State, payload: infer Payload) => State
+          ? Event<Payload extends void ? Exclude<Payload, undefined> : Payload>
+          : never;
+  };
+
+  for (const [key, reducer] of reducers) {
+    result[key] = createEvent() as never;
+    store.on(result[key], reducer);
+  }
+
+  return result;
 }
