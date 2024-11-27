@@ -3,7 +3,7 @@ import { combine, createApi, merge } from "./methods";
 import { createEvent } from "./event";
 
 describe("methods", () => {
-  it("should be create combine store", () => {
+  it("`combine`: метод позволяет получить состояние из каждого переданного стора и комбинировать их в одно значение, сохраняя в новом производном сторе", () => {
     const $balance = createStore(0);
     const $username = createStore("zerobias");
     const watcherMock = jest.fn();
@@ -18,7 +18,7 @@ describe("methods", () => {
     expect(watcherMock).toHaveBeenCalledWith("Hello, zerobias. Your balance is 0");
   });
 
-  it("should be create new event that triggers upon any of the given units being triggered", () => {
+  it("`merge`: объединяет апдейты массива юнитов в новое событие, которое будет срабатывать при запуске любой из переданных сущностей", () => {
     const watcherMock = jest.fn();
     const foo = createEvent<number>();
     const bar = createEvent<number>();
@@ -33,14 +33,14 @@ describe("methods", () => {
     expect(watcherMock).toHaveBeenCalledWith(42);
   });
 
-  it("should be generating events connected to a store by supplying an object with reducers for these events", () => {
+  it("`createApi`: способ массового создания событий для обновления стора на основе объекта с функциями-обработчиками", () => {
     const incrementMock = jest.fn();
-    const addMock = jest.fn().mockImplementation((store: number, payload: number): number => store + payload);
+    const addMock = jest.fn((store: number, payload: number): number => store + payload);
     const $store = createStore(0);
 
     const { increment, add } = createApi($store, {
       increment: incrementMock,
-      add: addMock as jest.Mock<number, [number, number]>,
+      add: addMock,
     });
 
     increment();

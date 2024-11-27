@@ -32,10 +32,10 @@ export function merge<State>(...units: Unit<State>[]): Event<State> {
   return event;
 }
 
-export function createApi<State, Api extends { [name: string]: (store: State, payload: never) => State }>(
-  store: Store<State>,
-  api: Api,
-) {
+export function createApi<
+  State,
+  Api extends Record<string, (store: State, payload: never) => State>,
+>(store: Store<State>, api: Api) {
   const reducers = Object.entries(api) as [keyof Api, (store: State, payload: never) => State][];
   const result = {} as {
     [K in keyof Api]: ((store: State, payload: void) => State) extends Api[K]

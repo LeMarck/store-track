@@ -63,7 +63,9 @@ describe("createEvent", () => {
 
   it("`.filterMap`: создает производное событие на основе данных из исходного с возможностью отмены вызова", () => {
     const listReceived = createEvent<string[]>();
-    const effectorFound = listReceived.filterMap((list: string[]) => list.find((name) => name === "effector"));
+    const effectorFound = listReceived.filterMap((list: string[]) =>
+      list.find((name) => name === "effector"),
+    );
     const watcherMock = jest.fn();
 
     effectorFound.watch(watcherMock);

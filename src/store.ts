@@ -78,7 +78,10 @@ export function createStore<State>(defaultState: State): Store<State> {
     map<NewState>(fn: (state: State, lastState?: NewState) => NewState): Store<NewState> {
       const lastResult = fn($store.getState());
       const updateStore = createEvent<NewState>();
-      const $newStore = createStore<NewState>(lastResult).on(updateStore, (_, newState) => newState);
+      const $newStore = createStore<NewState>(lastResult).on(
+        updateStore,
+        (_, newState) => newState,
+      );
 
       $store.watch((s: State) => {
         const lastState = $newStore.getState();

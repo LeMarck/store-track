@@ -1,6 +1,6 @@
 {
   "name": "store-track",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Naive implementation of the state manager library Effector",
   "author": {
     "name": "Evgeny Petrov",

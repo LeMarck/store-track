@@ -43,7 +43,9 @@ export function createEvent<Payload = void>(): Event<Payload> {
     return event;
   };
 
-  action.filterMap = <NewPayload>(fn: (payload: Payload) => NewPayload | void): Event<NewPayload> => {
+  action.filterMap = <NewPayload>(
+    fn: (payload: Payload) => NewPayload | void,
+  ): Event<NewPayload> => {
     const event = createEvent<NewPayload>();
 
     action.watch((payload) => {

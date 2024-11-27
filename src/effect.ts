@@ -9,14 +9,14 @@ type EffectFinally<Params, Done, Fail = Error> =
 export interface Effect<Params, Done, Fail = Error> {
   (params: Params): Promise<Done>;
 
-  done: Event<{ params: Params; result: Done }>;
-  doneData: Event<Done>;
-  fail: Event<{ params: Params; error: Fail }>;
-  failData: Event<Fail>;
-  finally: Event<EffectFinally<Params, Done, Fail>>;
-  pending: Store<boolean>;
-  use: {
-    (handler: (params: Params) => Promise<Done> | Done): void;
+  readonly done: Event<{ params: Params; result: Done }>;
+  readonly doneData: Event<Done>;
+  readonly fail: Event<{ params: Params; error: Fail }>;
+  readonly failData: Event<Fail>;
+  readonly finally: Event<EffectFinally<Params, Done, Fail>>;
+  readonly pending: Store<boolean>;
+  readonly use: {
+    (handler: (params: Params) => Promise<Done> | Done): Effect<Params, Done, Fail>;
     getCurrent(): (params: Params) => Promise<Done> | Done;
   };
 
@@ -27,8 +27,12 @@ export interface Effect<Params, Done, Fail = Error> {
   prepend<Payload>(fn: (payload: Payload) => Params): Event<Payload>;
 }
 
+const defaultHandler = () => {
+  throw new Error("No handler used in effect");
+};
+
 export function createEffect<Params, Done, Fail = Error>(
-  defaultHandler?: (params: Params) => Promise<Done> | Done,
+  handler: (params: Params) => Promise<Done> | Done = defaultHandler,
 ): Effect<Params, Done, Fail> {
   const watchers: Set<(params: Params) => void> = new Set();
   const finallyEvent = createEvent<EffectFinally<Params, Done, Fail>>();
@@ -41,19 +45,9 @@ export function createEffect<Params, Done, Fail = Error>(
   const updatePendingState = createEvent<boolean>();
   const $pendingStore = createStore(false).on(updatePendingState, (_, isPending) => isPending);
 
-  let currentHandler = defaultHandler;
-
-  function use(handler: (params: Params) => Promise<Done> | Done): void {
-    currentHandler = handler;
-  }
-
-  use.getCurrent = () => currentHandler;
+  let currentHandler = handler;
 
   async function effect(params: Params): Promise<Done> {
-    if (!currentHandler) {
-      throw new Error("No handler used in effect");
-    }
-
     watchers.forEach((subscriber) => subscriber(params));
 
     updatePendingState(true);
@@ -72,6 +66,14 @@ export function createEffect<Params, Done, Fail = Error>(
       throw error;
     }
   }
+
+  function use(handler: (params: Params) => Promise<Done> | Done): Effect<Params, Done, Fail> {
+    currentHandler = handler;
+
+    return effect;
+  }
+
+  use.getCurrent = () => currentHandler;
 
   effect.done = doneEvent;
   effect.doneData = doneEvent.map(({ result }) => result);
@@ -103,5 +105,5 @@ export function createEffect<Params, Done, Fail = Error>(
     return event;
   };
 
-  return effect as Effect<Params, Done, Fail>;
+  return effect;
 }
