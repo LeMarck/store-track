@@ -23,7 +23,6 @@ export interface Store<State> {
 export function createStore<State>(defaultState: State): Store<State> {
   const watchers: Set<(state: State) => void> = new Set();
   const subscribers: Map<Unit<unknown>, Unsubscribe> = new Map();
-  const initialState = { ...{ defaultState } };
 
   let state = defaultState;
 
@@ -59,21 +58,25 @@ export function createStore<State>(defaultState: State): Store<State> {
       }
     },
     watch<Payload>(
-      triggerOrWatcher: Unit<Payload> | ((state: State) => void),
-      fn?: (state: State, payload: Payload) => void,
+      ...params:
+        | [Unit<Payload>, (state: State, payload: Payload) => void]
+        | [(state: State) => void]
     ): Unsubscribe {
-      const argumentsSize = arguments.length;
-      const isUnit = (_: unknown): _ is Unit<Payload> => argumentsSize === 2;
+      const isUnit = (
+        params: unknown[],
+      ): params is [Unit<Payload>, (state: State, payload: Payload) => void] => params.length === 2;
 
-      if (isUnit(triggerOrWatcher)) {
-        return triggerOrWatcher.watch((payload: Payload) => fn && fn($store.getState(), payload));
+      if (isUnit(params)) {
+        return params[0].watch((payload: Payload) => params[1]($store.getState(), payload));
       }
 
-      watchers.add(triggerOrWatcher);
+      const watcher = params[0];
 
-      triggerOrWatcher($store.getState());
+      watchers.add(watcher);
 
-      return () => watchers.delete(triggerOrWatcher);
+      watcher($store.getState());
+
+      return () => watchers.delete(watcher);
     },
     map<NewState>(fn: (state: State, lastState?: NewState) => NewState): Store<NewState> {
       const lastResult = fn($store.getState());
@@ -96,7 +99,7 @@ export function createStore<State>(defaultState: State): Store<State> {
     },
     reset<Payload>(...triggers: Unit<Payload>[]): Store<State> {
       triggers.forEach((trigger) => {
-        $store.on(trigger, () => initialState.defaultState);
+        $store.on(trigger, () => defaultState);
       });
 
       return $store;
