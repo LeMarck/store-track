@@ -38,12 +38,12 @@
     "README.md"
   ],
   "devDependencies": {
-    "@eslint/js": "9.39.4",
+    "@eslint/js": "10.0.1",
     "@vitest/coverage-v8": "4.1.9",
-    "eslint": "9.39.4",
+    "eslint": "10.6.0",
     "globals": "17.7.0",
-    "prettier": "3.8.4",
-    "typescript": "5.9.3",
+    "prettier": "3.9.1",
+    "typescript": "6.0.3",
     "typescript-eslint": "8.62.0",
     "vitest": "4.1.9"
   },
